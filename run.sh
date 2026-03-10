@@ -12,6 +12,9 @@
 #   ./run.sh tracker update 3 --status "Phone Screen" --notes "Call Thu 2pm"
 #   ./run.sh tracker show 3
 #   ./run.sh tracker stats
+#
+# Open output folder:
+#   ./run.sh open
 
 cd "$(dirname "$0")"
 source venv/bin/activate
@@ -22,5 +25,6 @@ shift
 case "$COMMAND" in
   tailor)   python tailor.py "$@" ;;
   tracker)  python tracker.py "$@" ;;
-  *)        echo "Usage: ./run.sh [tailor|tracker] [options]"; exit 1 ;;
+  open)     mkdir -p output && open output ;;
+  *)        echo "Usage: ./run.sh [tailor|tracker|open] [options]"; exit 1 ;;
 esac
