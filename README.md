@@ -11,12 +11,14 @@ source venv/bin/activate
 pip install anthropic pdfplumber python-docx beautifulsoup4 requests
 ```
 
-**2. Set your Anthropic API key**
+**2. Set environment variables**
 ```bash
-echo 'export ANTHROPIC_API_KEY=your_key_here' >> ~/.zshrc
-source ~/.zshrc
+export ANTHROPIC_API_KEY=your_key_here       # required — get one at console.anthropic.com
+export BASE_RESUME_PATH=/path/to/resume.pdf  # required — your base resume as a PDF
+export OUTPUT_DIR=/path/to/output            # optional — defaults to ./output
 ```
-Get a key at [console.anthropic.com](https://console.anthropic.com) → API Keys.
+
+Add these to your `~/.zshrc` or `~/.bash_profile` to persist them.
 
 ---
 
@@ -34,6 +36,9 @@ Get a key at [console.anthropic.com](https://console.anthropic.com) → API Keys
 
 # Paste manually (type END when done)
 ./run.sh tailor --company "Stripe" --role "PMM"
+
+# Override which resume to use for this run
+./run.sh tailor --resume /path/to/other_resume.pdf --url "https://..."
 ```
 
 Tailored resumes are saved to the `output/` folder as both `.txt` and `.docx`. Each run also automatically logs the application to the tracker.
