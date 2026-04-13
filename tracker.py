@@ -11,12 +11,13 @@ Usage:
 """
 
 import argparse
+import os
 import sqlite3
 import sys
 from datetime import datetime
 from pathlib import Path
 
-DB_PATH = Path("/Users/didya/Projects/job-search/resume-tailor/applications.db")
+DB_PATH = Path(os.environ.get("DB_PATH", Path(__file__).parent / "applications.db"))
 
 STATUSES = ["Saved", "Applied", "Phone Screen", "Interview", "Offer", "Rejected", "Withdrawn"]
 
@@ -177,7 +178,7 @@ def cmd_stats(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Job application tracker")
+    parser = argparse.ArgumentParser(description="Job application tracker (set DB_PATH env var to change database location)")
     sub = parser.add_subparsers(dest="command")
 
     # add

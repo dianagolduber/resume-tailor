@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """
-Resume Tailor — automatically tailors Diana's resume to a job description using Claude.
+Resume Tailor — automatically tailors a resume to a job description using Claude.
 Usage:
     python tailor.py                              # paste job description interactively
     python tailor.py --url "https://..."          # scrape job from a URL
     python tailor.py --jd job.txt                 # load job description from a file
     python tailor.py --url "https://..." --company "Stripe" --role "PMM"
+
+Required env vars:
+    ANTHROPIC_API_KEY   your Claude API key
+    BASE_RESUME_PATH    path to your base resume PDF (or pass --resume flag)
+
+Optional env vars:
+    OUTPUT_DIR          where to save tailored resumes (default: ./output)
 """
 
 import argparse
@@ -22,8 +29,8 @@ from bs4 import BeautifulSoup
 from docx import Document
 from docx.shared import Pt
 
-BASE_RESUME_PATH = Path("/Users/didya/Documents/Diana Golduber Resume (11_4) - Google Docs.pdf")
-OUTPUT_DIR = Path("/Users/didya/Projects/job-search/resume-tailor/output")
+BASE_RESUME_PATH = Path(os.environ.get("BASE_RESUME_PATH", "resume.pdf"))
+OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", Path(__file__).parent / "output"))
 
 SYSTEM_PROMPT = """You are an expert resume writer and career coach specializing in marketing and product marketing roles.
 Your job is to tailor a resume to a specific job description while keeping all facts 100% accurate — never invent experience, metrics, or skills.
@@ -158,10 +165,11 @@ def save_outputs(content: str, company: str, role: str) -> tuple[Path, Path]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Tailor Diana's resume to a job description")
+    parser = argparse.ArgumentParser(description="Tailor a resume to a job description")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--url", help="URL of the job posting to scrape")
     group.add_argument("--jd", help="Path to a text file containing the job description")
+    parser.add_argument("--resume", help="Path to your base resume PDF (overrides BASE_RESUME_PATH env var)")
     parser.add_argument("--company", default="", help="Company name (overrides auto-detected, used in filename)")
     parser.add_argument("--role", default="", help="Role/title (overrides auto-detected, used in filename)")
     args = parser.parse_args()
@@ -172,8 +180,14 @@ def main():
         print("Set it with: export ANTHROPIC_API_KEY=your_key_here")
         sys.exit(1)
 
+    resume_path = Path(args.resume) if args.resume else BASE_RESUME_PATH
+    if not resume_path.exists():
+        print(f"Error: resume not found at {resume_path}")
+        print("Set BASE_RESUME_PATH env var or use --resume flag.")
+        sys.exit(1)
+
     print("Reading base resume...")
-    resume_text = read_resume_pdf(BASE_RESUME_PATH)
+    resume_text = read_resume_pdf(resume_path)
 
     print("Loading job description...")
     job_description, company, role = get_job_description(args)
